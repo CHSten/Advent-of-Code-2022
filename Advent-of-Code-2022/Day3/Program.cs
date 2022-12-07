@@ -43,6 +43,22 @@ namespace Day3
 
             Console.WriteLine($"Sum of all the priorities:\n" +
                 $"{prioritySum}");
+
+            prioritySum = 0;
+            for (int i = 0; i < rucksacks.Length; i += 3)
+            {
+                var rucksack0 = rucksacks[i];
+                var rucksack1 = rucksacks[i+1];
+                var rucksack2 = rucksacks[i+2];
+
+                var common = rucksack0.Intersect(rucksack1.Intersect(rucksack2));
+
+                foreach (var character in common)
+                    prioritySum += Priority[character];
+            }
+
+            Console.WriteLine($"Sum of all the three-elf groups priorities:\n" +
+                $"{prioritySum}");
         }
     }
 }
