@@ -1,4 +1,7 @@
 ﻿using Advent_of_Code_2022;
+using System.ComponentModel;
+using System.Security.Cryptography.X509Certificates;
+using System.Xml.Linq;
 
 namespace Day7
 {
@@ -10,63 +13,93 @@ namespace Day7
             LIST = "$ ls";
         public class Directory
         {
+            public int ID;
             public string Name;
             public int Size;
-            public List<string> NextDirectories;
+            public List<Directory> InnerDirectories;
+            public Directory? PrevDirectory;
         }
 
         static void Main(string[] args)
         {
             var input = Input.Get();
             var lines = input.Split("\r\n");
-            var directories = new List<Directory>();
-            var currentIdx = 0;
+            var currentDirectory = new Directory();
+            int newid = 0;
 
             string previousCommand = null;
-
-            directories.Add(new Directory()
+            Directory outermostDirectory = new Directory()
             {
                 Name = OUTERMOST_DIRECTORY,
-                NextDirectories = new List<string>(),
-            });
+                InnerDirectories = new List<Directory>(),
+                ID = 0,
+                PrevDirectory = null,
+            };
+
+            currentDirectory = outermostDirectory;
             for (int i = 1; i < lines.Length; i++)
             {
                 if (lines[i].StartsWith(CHANGE_DIRECTORY))
                 {
-                    var path = lines[i].Substring(CHANGE_DIRECTORY.Length);
+                    var path = lines[i].Substring(CHANGE_DIRECTORY.Length+1);
+                    previousCommand = lines[i];
 
                     if (path == MOVE_OUT)
                     {
-                        currentIdx--;
+                        currentDirectory = currentDirectory.PrevDirectory;
                         continue;
                     }
+                    else
+                        currentDirectory = currentDirectory.InnerDirectories.Single(x => x.Name == path);
 
-                    previousCommand = lines[i];
-                    var directory = new Directory()
-                    {
-                        Name = path,
-                        NextDirectories = new List<string>(),
-                        Size = 0,
-                    };
-                    directories.Add(directory);
-                    currentIdx++;
                 }
                 else if (lines[i].StartsWith(LIST))
                 {
                     previousCommand = lines[i];
                     continue;
                 }
-
-                if (previousCommand.StartsWith(LIST))
+                else if (previousCommand.StartsWith(LIST))
                 {
                     var line = lines[i].Split(" ");
 
                     if (line[0].StartsWith("dir"))
-                        directories[currentIdx].NextDirectories.Add(line[1]);
+                        currentDirectory.InnerDirectories.Add(new Directory()
+                        { 
+                            Name = line[1],
+                            InnerDirectories = new List<Directory>(),
+                            PrevDirectory = currentDirectory,
+                            ID = ++newid,
+                        });
                     else
-                        directories[currentIdx].Size += int.Parse(line[0]);
+                    {
+                        if (int.Parse(line[0]) >= 100000)
+                            currentDirectory.Size += int.Parse(line[0]);
+                    }
                 }
             }
+
+            int size = 0;
+            var queue = new Stack<Directory>();
+            queue.Push(outermostDirectory);
+
+            while (queue.Count != 0)
+            {
+
+                var directory = queue.Pop();
+
+                for (int i = 0; i < directory.InnerDirectories.Count; i++)
+                {
+                    directory.Size += directory.InnerDirectories[i].Size;
+                }
+
+                foreach (var innerDirectory in directory.InnerDirectories)
+                {
+                    queue.Push(innerDirectory);
+                }
+
+            }
+
+            Console.WriteLine(outermostDirectory.Size);
         }
     }
 }
