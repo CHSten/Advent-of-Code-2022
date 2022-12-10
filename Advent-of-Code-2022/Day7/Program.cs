@@ -1,5 +1,6 @@
 ﻿using Advent_of_Code_2022;
 using System.ComponentModel;
+using System.Numerics;
 using System.Security.Cryptography.X509Certificates;
 using System.Xml.Linq;
 
@@ -13,9 +14,8 @@ namespace Day7
             LIST = "$ ls";
         public class Directory
         {
-            public int ID;
             public string Name;
-            public int Size;
+            public long Size;
             public List<Directory> InnerDirectories;
             public Directory? PrevDirectory;
         }
@@ -25,23 +25,23 @@ namespace Day7
             var input = Input.Get();
             var lines = input.Split("\r\n");
             var currentDirectory = new Directory();
-            int newid = 0;
 
             string previousCommand = null;
             Directory outermostDirectory = new Directory()
             {
                 Name = OUTERMOST_DIRECTORY,
                 InnerDirectories = new List<Directory>(),
-                ID = 0,
                 PrevDirectory = null,
             };
 
+            //Setup
             currentDirectory = outermostDirectory;
             for (int i = 1; i < lines.Length; i++)
             {
                 if (lines[i].StartsWith(CHANGE_DIRECTORY))
                 {
-                    var path = lines[i].Substring(CHANGE_DIRECTORY.Length+1);
+                    var path = lines[i].Substring(CHANGE_DIRECTORY.Length + 1);
+
                     previousCommand = lines[i];
 
                     if (path == MOVE_OUT)
@@ -64,42 +64,63 @@ namespace Day7
 
                     if (line[0].StartsWith("dir"))
                         currentDirectory.InnerDirectories.Add(new Directory()
-                        { 
+                        {
                             Name = line[1],
                             InnerDirectories = new List<Directory>(),
                             PrevDirectory = currentDirectory,
-                            ID = ++newid,
                         });
                     else
-                    {
-                        if (int.Parse(line[0]) >= 100000)
-                            currentDirectory.Size += int.Parse(line[0]);
-                    }
+                        currentDirectory.Size += long.Parse(line[0]);
                 }
             }
 
-            int size = 0;
             var queue = new Stack<Directory>();
+            List<Directory> allDirectories = new List<Directory>();
             queue.Push(outermostDirectory);
 
             while (queue.Count != 0)
             {
-
                 var directory = queue.Pop();
+                allDirectories.Add(directory);
 
-                for (int i = 0; i < directory.InnerDirectories.Count; i++)
+                var newDirectory = directory;
+                while (newDirectory.PrevDirectory != null)
                 {
-                    directory.Size += directory.InnerDirectories[i].Size;
+                    newDirectory.PrevDirectory.Size += directory.Size;
+                    newDirectory = newDirectory.PrevDirectory;
                 }
 
                 foreach (var innerDirectory in directory.InnerDirectories)
-                {
                     queue.Push(innerDirectory);
-                }
-
             }
 
-            Console.WriteLine(outermostDirectory.Size);
+            //Part1
+            long sumOfAllDirectorySizes = 0;
+            foreach (var directory in allDirectories)
+            {
+                if (directory.Size > 100000)
+                    continue;
+
+                sumOfAllDirectorySizes += directory.Size;
+            }
+            Console.WriteLine($"The sum of all the directories is:" +
+                $"{sumOfAllDirectorySizes}");
+
+            //Part2
+            long totalSpace = 70000000;
+            long updateSpace = 30000000;
+            long unusedSpace = totalSpace - outermostDirectory.Size;
+            long minRequiredSpace = updateSpace - unusedSpace;
+
+            Directory directoryToDelete = outermostDirectory;
+            foreach (var directory in allDirectories)
+            {
+                if (directory.Size >= minRequiredSpace && directory.Size < directoryToDelete.Size)
+                    directoryToDelete = directory;
+            }
+
+            Console.WriteLine($"the size of the directory which frees up enough space:" +
+                $"{directoryToDelete.Size}");
         }
     }
 }
