@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -9,7 +9,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Advent-of-Code-2022\Advent-of-Code-2022.csproj" />
-    <ProjectReference Include="..\Day10\Day10.csproj" />
   </ItemGroup>
 
 </Project>

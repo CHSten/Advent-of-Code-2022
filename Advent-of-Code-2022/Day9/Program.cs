@@ -186,32 +186,6 @@ namespace Day9
             Console.WriteLine($"the number of positions the tail 9 visited atleast once:\n" +
                 $"{visitedPointsPt2.Count}");
 
-            //for (int y = visitedPoints.Max(p => p.Y) + 1; y >= visitedPoints.Min(p => p.Y); y--)
-            //{
-            //    for (int x = visitedPoints.Min(p => p.X); x < visitedPoints.Max(p => p.X) + 1; x++)
-            //    {
-            //        if (x == 0 && y == 0)
-            //        {
-            //            Console.ForegroundColor = ConsoleColor.Yellow;
-            //            Console.Write("s");
-            //            continue;
-            //        }
-
-            //        if (visitedPoints.Contains(new Point(x, y)))
-            //        {
-            //            Console.ForegroundColor = ConsoleColor.Cyan;
-            //            Console.Write("#");
-            //        }
-            //        else
-            //        {
-            //            Console.ForegroundColor = ConsoleColor.White;
-            //            Console.Write(".");
-            //        }
-            //    }
-
-            //    Console.Write("\n");
-            //}
-
         }
     }
 }
